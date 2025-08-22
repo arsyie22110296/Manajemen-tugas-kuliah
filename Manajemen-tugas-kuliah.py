@@ -50,6 +50,18 @@ st.markdown("""
 
 data = load_data()
 
+# Fungsi notifikasi sementara
+def show_temp_message(msg, type="success", delay=2):
+    placeholder = st.empty()
+    if type == "success":
+        placeholder.success(msg)
+    elif type == "warning":
+        placeholder.warning(msg)
+    elif type == "error":
+        placeholder.error(msg)
+    time.sleep(delay)
+    placeholder.empty()
+
 # Form input tugas
 with st.form("form_tugas"):
     matkul = st.text_input("Nama Mata Kuliah")
@@ -92,8 +104,9 @@ if not data.empty:
     if st.button("❌ Hapus Tugas"):
         data = data[data["Tugas"] != selected_task]  # filter, hapus yang dipilih
         save_data(data)
-        st.success(f"Tugas '{selected_task}' berhasil dihapus!")
-        st.experimental_rerun()
+        show_temp_message(f"Tugas '{selected_task}' berhasil dihapus!", "warning")
+        st.experimental_set_query_params(refresh=str(datetime.now()))  # ganti rerun
+        st.stop()
 else:
     st.info("Belum ada tugas yang ditambahkan.")
 
