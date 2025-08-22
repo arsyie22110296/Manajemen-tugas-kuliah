@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
+import time
 
 # File untuk simpan data
 FILE_NAME = "tugas.csv"
@@ -104,9 +105,8 @@ if not data.empty:
     if st.button("❌ Hapus Tugas"):
         data = data[data["Tugas"] != selected_task]  # filter, hapus yang dipilih
         save_data(data)
-        show_temp_message(f"Tugas '{selected_task}' berhasil dihapus!", "warning")
-        st.experimental_set_query_params(refresh=str(datetime.now()))  # ganti rerun
-        st.stop()
+        show_temp_message(f"Tugas '{selected_task}' berhasil dihapus!")
+        st.rerun()
 else:
     st.info("Belum ada tugas yang ditambahkan.")
 
