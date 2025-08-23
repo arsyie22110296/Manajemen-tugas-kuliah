@@ -36,11 +36,11 @@ st.markdown("""
     <style>
     .stApp {
         background-color: lightcyan;
-        color: white;
+        color: black;
     }
     .stDataFrame {
-        background-color: #1e1e1e;
-        color: lightgrey;
+        background-color: white;
+        color: black;
     }
     h1, h2, h3, h4, h5, h6, label, p, div {
         color: black !important;
@@ -62,21 +62,30 @@ def show_temp_message(msg, type="success", delay=2):
         placeholder.error(msg)
     time.sleep(delay)
     placeholder.empty()
-
-# Form input tugas
+   
+# Inisialisasi kunci form untuk reset
 with st.form("form_tugas"):
-    matkul = st.text_input("Nama Mata Kuliah")
-    tugas = st.text_input("Nama Tugas")
-    deadline = st.date_input("Deadline", datetime.today() + timedelta(days=7))
-    submit = st.form_submit_button("Tambah Tugas")
+    # Gunakan kunci dinamis untuk widget
+    if "widget_key" not in st.session_state:
+        st.session_state.widget_key = 0
 
-    if submit and matkul and tugas:
-        new_data = pd.DataFrame([[matkul, tugas, deadline]], columns=data.columns)
+    matkul = st.text_input("Nama Mata Kuliah", key=f"matkul_{st.session_state.widget_key}")
+    tugas = st.text_input("Nama Tugas", key=f"tugas_{st.session_state.widget_key}")
+    deadline = st.date_input("Deadline", datetime.today() + timedelta(days=7), key=f"deadline_{st.session_state.widget_key}")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        simpan = st.form_submit_button("💾 Simpan")
+    with col2:
+        reset = st.form_submit_button("🆕 Tugas Baru")
+
+    if simpan and matkul and tugas:
+        new_data = pd.DataFrame([[matkul, tugas, deadline]], columns=["Mata Kuliah", "Tugas", "Deadline"])
         data = pd.concat([data, new_data], ignore_index=True)
         save_data(data)
-        st.success("✅ Tugas berhasil ditambahkan!")
+        st.success(f"✅ Tugas '{tugas}' berhasil disimpan!")
 
-         # Bunyi notifikasi
+        # Bunyi notifikasi
         st.markdown(
             """
             <audio autoplay>
@@ -85,6 +94,21 @@ with st.form("form_tugas"):
             """,
             unsafe_allow_html=True
         )
+
+    if reset:
+        # Tambah widget_key untuk buat widget baru
+        st.session_state.widget_key += 1
+        # Hapus kunci widget lama dari session_state
+        old_key = f"matkul_{st.session_state.widget_key - 1}"
+        if old_key in st.session_state:
+            del st.session_state[old_key]
+        old_key = f"tugas_{st.session_state.widget_key - 1}"
+        if old_key in st.session_state:
+            del st.session_state[old_key]
+        old_key = f"deadline_{st.session_state.widget_key - 1}"
+        if old_key in st.session_state:
+            del st.session_state[old_key]
+        st.rerun()
 
 # Tampilkan daftar tugas
 st.subheader("📋 Daftar Tugas")
